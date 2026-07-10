@@ -84,6 +84,12 @@ function todayISO() {
   return local.toISOString().split('T')[0];
 }
 
+function formatDateDMY(isoDate) {
+  if (!isoDate) return '';
+  const [y, m, d] = isoDate.split('-');
+  return `${d}-${m}-${y}`;
+}
+
 function setState(state) {
   loadingState.classList.add('hidden');
   loadingState.classList.remove('flex');
@@ -149,7 +155,7 @@ function renderMedia(data) {
 
 async function renderInfo(data) {
   const lang = currentLang;
-  apodDate.textContent = data.date || '';
+  apodDate.textContent = formatDateDMY(data.date);
 
   if (lang === 'en') {
     apodTitle.textContent = data.title || translations.en.untitled;
