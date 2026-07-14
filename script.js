@@ -78,10 +78,16 @@ async function translateText(text, targetLang) {
 
 // ===================== HELPERS =====================
 function todayISO() {
-  const d = new Date();
-  const offset = d.getTimezoneOffset();
-  const local = new Date(d.getTime() - offset * 60 * 1000);
-  return local.toISOString().split('T')[0];
+  // ইউজার যেখানেই থাকুক না কেন, আমেরিকার নিউ ইয়র্ক (EST/EDT) টাইমজোন অনুযায়ী আজকের তারিখ বের করবে
+  const options = { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' };
+  const formatter = new Intl.DateTimeFormat('en-US', options);
+  const parts = formatter.formatToParts(new Date());
+  
+  const year = parts.find(p => p.type === 'year').value;
+  const month = parts.find(p => p.type === 'month').value;
+  const day = parts.find(p => p.type === 'day').value;
+  
+  return `${year}-${month}-${day}`;
 }
 
 function formatDateDMY(isoDate) {
