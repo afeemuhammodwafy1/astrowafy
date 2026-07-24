@@ -1,140 +1,483 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AstroWafy</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstroWafy</title>
+  <!-- Tailwind CDN (lightweight) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ===== CSS (dark theme, modern icons via unicode/emoji + svg inline) ===== */
+    :root { --bg: #050505; --muted: #a3a3a3; --hair: #171717; }
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    html, body { background-color: var(--bg); font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; overflow-x: hidden; width: 100%; }
+    .font-mono-tag { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.85; cursor: pointer; }
+    input[type="date"] { color-scheme: dark; }
+    .fade-in { animation: fadeIn 300ms ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .hover-reveal { transition: opacity 300ms ease, transform 300ms ease; opacity: 1; transform: translateY(0); }
+    @media (hover: hover) and (pointer: fine) {
+      .hover-reveal { opacity: 0; transform: translateY(6px); }
+      .media-card:hover .hover-reveal { opacity: 1; transform: translateY(0); }
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #050505; }
+    ::-webkit-scrollbar-thumb { background: #262626; border-radius: 8px; }
+    .spinner { border: 2px solid #262626; border-top-color: #ffffff; border-radius: 50%; width: 28px; height: 28px; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-press:active { transform: scale(0.97); }
+    .btn-press:disabled { opacity: 0.6; cursor: wait; }
+    .justify-text { text-align: left; }
+    @media (min-width: 640px) { .justify-text { text-align: justify; text-justify: inter-word; } }
+    .bn-text { font-family: 'Noto Sans Bengali', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
+    .lang-toggle { display: flex; align-items: center; border: 1px solid #262626; border-radius: 9999px; padding: 2px; background: #0a0a0a; }
+    .lang-toggle button { font-size: 11px; letter-spacing: 0.05em; padding: 6px 12px; min-width: 34px; border-radius: 9999px; color: #737373; transition: background-color 300ms ease, color 300ms ease; }
+    .lang-toggle button.active { background-color: #ffffff; color: #000000; font-weight: 600; }
+    .one-click-download { position: absolute; top: 12px; right: 12px; z-index: 10; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.95); color: #000; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; padding: 8px 14px; border-radius: 9999px; backdrop-filter: blur(6px); transition: background-color 300ms ease, transform 150ms ease; }
+    .one-click-download:hover { background-color: #ffffff; }
+    .one-click-download:active { transform: scale(0.96); }
+    .one-click-download:disabled { opacity: 0.6; cursor: wait; }
+    @media (min-width: 640px) { .one-click-download { top: 16px; right: 16px; font-size: 12px; padding: 9px 16px; } }
 
-<!-- Tailwind CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
+    /* lightbox overlay */
+    .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px); }
+    .lightbox-overlay.active { display: flex; }
+    .lightbox-overlay img { max-width: 95vw; max-height: 90vh; object-fit: contain; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+    .lightbox-close { position: absolute; top: 24px; right: 32px; font-size: 32px; color: white; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; }
+    .lightbox-close:hover { opacity: 1; }
 
-<!-- Google Fonts: Plus Jakarta Sans, JetBrains Mono, Noto Sans Bengali -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    /* favorites drawer */
+    .fav-drawer { position: fixed; top: 0; right: -420px; width: 380px; max-width: 90vw; height: 100%; background: #0a0a0a; border-left: 1px solid #1f1f1f; z-index: 1000; transition: right 0.3s cubic-bezier(0.22, 1, 0.36, 1); padding: 20px; overflow-y: auto; color: white; }
+    .fav-drawer.open { right: 0; }
+    .fav-drawer h2 { font-size: 18px; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #222; padding-bottom: 12px; }
+    .fav-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #181818; align-items: center; cursor: pointer; }
+    .fav-item:hover { background: #111; }
+    .fav-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; background: #111; }
+    .fav-item .info { flex:1; }
+    .fav-item .info .title { font-size: 13px; font-weight: 500; }
+    .fav-item .info .date { font-size: 10px; color: #888; }
+    .fav-item .remove { background: none; border: none; color: #555; font-size: 18px; cursor: pointer; }
+    .fav-item .remove:hover { color: #ff4444; }
+    .fav-drawer .empty { color: #555; text-align: center; padding: 40px 0; font-size: 14px; }
+    .fav-toggle-btn { background: transparent; border: 1px solid #2a2a2a; color: #ccc; padding: 4px 12px; border-radius: 30px; font-size: 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
+    .fav-toggle-btn:hover { background: #1a1a1a; color: white; }
 
-<!-- App stylesheet -->
-<link rel="stylesheet" href="style.css">
+    /* quality toggle */
+    .quality-toggle { display: flex; gap: 6px; align-items: center; margin-left: 8px; }
+    .quality-toggle button { background: transparent; border: 1px solid #2a2a2a; color: #888; padding: 2px 10px; border-radius: 30px; font-size: 10px; cursor: pointer; transition: 0.2s; }
+    .quality-toggle button.active { background: #ffffff; color: #000; border-color: #fff; }
+    .quality-toggle button:hover { color: #eee; }
+
+    /* modern icon buttons (share & fav) */
+    .action-icon-btn {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .action-icon-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3); transform: scale(1.05); }
+    .action-icon-btn:active { transform: scale(0.92); }
+    
+    /* Instagram-style heart: empty = white outline, filled = red with pulse */
+    .action-icon-btn.favorited {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: transparent;
+      color: #ff3040;
+    }
+    .action-icon-btn.favorited svg {
+      fill: #ff3040;
+      stroke: #ff3040;
+      transition: transform 0.15s ease;
+    }
+    .action-icon-btn.favorited:active svg {
+      transform: scale(0.85);
+    }
+    /* heart beat animation on like */
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.25); }
+      60% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    .action-icon-btn.favorited svg {
+      animation: heartBeat 0.4s ease;
+    }
+
+    .icon-svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: fill 0.2s ease, stroke 0.2s ease; }
+    .action-icon-btn.favorited .icon-svg { fill: #ff3040; stroke: #ff3040; }
+
+    @media (max-width: 640px) { .fav-drawer { width: 100%; max-width: 100%; right: -100%; } }
+  </style>
 </head>
-
 <body class="min-h-screen text-white selection:bg-white selection:text-black">
 
-  <!-- ===================== NAVBAR ===================== -->
-  <header class="border-b border-neutral-900">
-    <div class="max-w-6xl mx-auto px-4 sm:px-8 min-h-16 py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-      <div class="text-xs sm:text-sm md:text-base font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase text-white whitespace-nowrap">
-        ASTRO<span class="text-neutral-600 font-normal">WAFY</span>
-      </div>
-      <nav class="flex items-center gap-3 sm:gap-6">
-        <a href="https://amwafy.xyz" target="_blank" rel="noopener noreferrer" class="text-xs sm:text-sm lowercase text-neutral-500 hover:text-white transition-colors duration-300 whitespace-nowrap">contact</a>
-
-        <!-- Language Toggle -->
-        <div class="lang-toggle">
-          <button id="langEnBtn" type="button">EN</button>
-          <button id="langBnBtn" type="button">বাং</button>
-        </div>
-      </nav>
+<header class="border-b border-neutral-900">
+  <div class="max-w-6xl mx-auto px-4 sm:px-8 min-h-16 py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+    <div class="text-xs sm:text-sm md:text-base font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase text-white whitespace-nowrap">
+      ASTRO<span class="text-neutral-600 font-normal">WAFY</span>
     </div>
-  </header>
-
-  <!-- ===================== CONTROL DASHBOARD ===================== -->
-  <div class="border-b border-[#171717] bg-neutral-900/30">
-    <div class="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-
-      <!-- Date Input -->
-      <div class="flex items-center gap-3">
-        <label for="datePicker" class="text-[11px] uppercase tracking-widest text-neutral-500 hidden sm:block">date</label>
-        <input
-          id="datePicker"
-          type="date"
-          class="bg-black border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-neutral-500 transition-colors duration-300 w-full sm:w-auto"
-        />
+    <nav class="flex items-center gap-3 sm:gap-6">
+      <a href="https://amwafy.xyz" target="_blank" rel="noopener noreferrer" class="text-xs sm:text-sm lowercase text-neutral-500 hover:text-white transition-colors duration-300 whitespace-nowrap">contact</a>
+      <div class="lang-toggle">
+        <button id="langEnBtn" type="button">EN</button>
+        <button id="langBnBtn" type="button">বাং</button>
       </div>
+      <button class="fav-toggle-btn" id="favToggleBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
+        Favorites
+      </button>
+    </nav>
+  </div>
+</header>
 
-      <!-- Refresh Button -->
-      <button
-        id="refreshBtn"
-        class="btn-press flex items-center justify-center gap-2 bg-white text-black rounded-full px-5 py-2.5 text-xs sm:text-sm font-semibold tracking-wide hover:bg-neutral-200 transition-colors duration-300 self-start sm:self-auto"
-      >
-        <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 transition-transform duration-500">
-          <path d="M21 12a9 9 0 1 1-2.64-6.36" />
-          <path d="M21 3v6h-6" />
-        </svg>
+<div class="border-b border-[#171717] bg-neutral-900/30">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3 flex-wrap">
+      <label for="datePicker" class="text-[11px] uppercase tracking-widest text-neutral-500 hidden sm:block">date</label>
+      <input id="datePicker" type="date" class="bg-black border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-neutral-500 transition-colors duration-300 w-full sm:w-auto">
+      <button id="surpriseBtn" class="btn-press bg-white/10 hover:bg-white/20 text-white rounded-full px-5 py-2.5 text-xs sm:text-sm font-semibold tracking-wide transition-colors duration-300 border border-neutral-700">🎲 Surprise</button>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="quality-toggle" id="qualityToggle">
+        <button id="qualityStd" class="active">SD</button>
+        <button id="qualityHd">HD</button>
+      </div>
+      <button id="refreshBtn" class="btn-press flex items-center justify-center gap-2 bg-white text-black rounded-full px-5 py-2.5 text-xs sm:text-sm font-semibold tracking-wide hover:bg-neutral-200 transition-colors duration-300">
+        <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 transition-transform duration-500"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
         <span>Refresh</span>
       </button>
     </div>
   </div>
+</div>
 
-  <!-- ===================== MAIN CONTENT ===================== -->
-  <main class="max-w-6xl mx-auto px-5 sm:px-8 py-10 sm:py-14">
+<main class="max-w-6xl mx-auto px-5 sm:px-8 py-10 sm:py-14">
+  <div id="loadingState" class="hidden flex-col items-center justify-center py-24 gap-4"><div class="spinner"></div><p class="text-[11px] uppercase tracking-[0.3em] text-neutral-500">retrieving transmission</p></div>
+  <div id="errorState" class="hidden py-24 text-center"><p class="text-white text-lg font-medium mb-2">Signal Lost</p><p class="text-neutral-500 text-sm">We couldn't retrieve data for this date. Please try another.</p></div>
 
-    <!-- Loading State -->
-    <div id="loadingState" class="hidden flex-col items-center justify-center py-24 gap-4">
-      <div class="spinner"></div>
-      <p class="text-[11px] uppercase tracking-[0.3em] text-neutral-500">retrieving transmission</p>
-    </div>
-
-    <!-- Error State -->
-    <div id="errorState" class="hidden py-24 text-center">
-      <p class="text-white text-lg font-medium mb-2">Signal Lost</p>
-      <p class="text-neutral-500 text-sm">We couldn't retrieve data for this date. Please try another.</p>
-    </div>
-
-    <!-- Content -->
-    <div id="content" class="hidden">
-
-      <!-- Media Card -->
-      <div class="media-card relative border border-neutral-900 rounded-2xl overflow-hidden bg-neutral-950 fade-in">
-
-        <!-- One-Click Download Button — always visible, no hover/tap-to-reveal needed -->
-        <button id="oneClickDownloadBtn" type="button" class="one-click-download btn-press hidden">
-          <span id="oneClickDownloadLabel">Download</span>
-          <svg id="oneClickDownloadIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-            <path d="M12 3v12" /><path d="M7 10l5 5 5-5" /><path d="M5 21h14" />
-          </svg>
+  <div id="content" class="hidden">
+    <div class="media-card relative border border-neutral-900 rounded-2xl overflow-hidden bg-neutral-950 fade-in">
+      <button id="oneClickDownloadBtn" type="button" class="one-click-download btn-press hidden"><span id="oneClickDownloadLabel">Download</span><svg id="oneClickDownloadIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></button>
+      <div id="mediaWrapper" class="w-full flex items-center justify-center bg-black cursor-pointer"></div>
+      <div id="hdOverlay" class="hover-reveal absolute bottom-3 right-3 sm:bottom-4 sm:right-4 hidden"><a id="hdLink" href="#" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-white/95 text-black text-xs font-semibold tracking-wide px-4 py-2 rounded-full backdrop-blur-sm hover:bg-white transition-colors duration-300"><span>View HD Quality</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a></div>
+      <!-- Modern share & fav buttons -->
+      <div class="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 flex gap-2 z-10">
+        <button id="shareBtn" class="action-icon-btn" aria-label="Share">
+          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         </button>
-
-        <div id="mediaWrapper" class="w-full flex items-center justify-center bg-black">
-          <!-- image or iframe injected here -->
-        </div>
-
-        <!-- Hover overlay button (image only) -->
-        <div id="hdOverlay" class="hover-reveal absolute bottom-3 right-3 sm:bottom-4 sm:right-4 hidden">
-          <a id="hdLink" href="#" target="_blank" rel="noopener noreferrer"
-             class="flex items-center gap-2 bg-white/95 text-black text-xs font-semibold tracking-wide px-4 py-2 rounded-full backdrop-blur-sm hover:bg-white transition-colors duration-300">
-            <span>View HD Quality</span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-              <path d="M7 17L17 7" /><path d="M7 7h10v10" />
-            </svg>
-          </a>
-        </div>
-      </div>
-
-      <!-- Information Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 mt-10 sm:mt-12">
-
-        <!-- Column 1: Title + Date -->
-        <div class="md:col-span-1 fade-in">
-          <h1 id="apodTitle" class="text-2xl sm:text-3xl font-bold text-white leading-tight mb-4 transition-opacity duration-300"></h1>
-          <span id="apodDate" class="font-mono-tag inline-block text-[11px] tracking-widest text-neutral-400 border border-neutral-800 rounded-full px-3 py-1"></span>
-        </div>
-
-        <!-- Columns 2-3: Explanation -->
-        <div class="md:col-span-2 fade-in">
-          <p id="apodExplanation" class="justify-text text-[#a3a3a3] text-sm sm:text-[15px] leading-relaxed transition-opacity duration-300"></p>
-        </div>
-
+        <button id="favBtn" class="action-icon-btn" aria-label="Favorite">
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
+        </button>
       </div>
     </div>
 
-  </main>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 mt-10 sm:mt-12">
+      <div class="md:col-span-1 fade-in"><h1 id="apodTitle" class="text-2xl sm:text-3xl font-bold text-white leading-tight mb-4 transition-opacity duration-300"></h1><span id="apodDate" class="font-mono-tag inline-block text-[11px] tracking-widest text-neutral-400 border border-neutral-800 rounded-full px-3 py-1"></span></div>
+      <div class="md:col-span-2 fade-in"><p id="apodExplanation" class="justify-text text-[#a3a3a3] text-sm sm:text-[15px] leading-relaxed transition-opacity duration-300"></p></div>
+    </div>
+  </div>
+</main>
 
-  <footer class="border-t border-neutral-900 py-8">
-    <p class="text-center text-[11px] tracking-widest uppercase text-neutral-700">AstroWafy — Powered by NASA Open APIs</p>
-  </footer>
+<footer class="border-t border-neutral-900 py-8"><p class="text-center text-[11px] tracking-widest uppercase text-neutral-700">AstroWafy — Powered by NASA Open APIs</p></footer>
 
-  <!-- App script -->
-  <script src="script.js"></script>
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="lightboxOverlay"><span class="lightbox-close" id="lightboxClose">&times;</span><img id="lightboxImg" src="" alt="High-res preview"></div>
 
+<!-- Favorites Drawer -->
+<div class="fav-drawer" id="favDrawer">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><h2>⭐ Favorites</h2><button id="closeDrawerBtn" style="background:none; border:none; color:#888; font-size:24px; cursor:pointer;">&times;</button></div>
+  <div id="favList"></div>
+</div>
+
+<script>
+  // ===== CONFIG =====
+  const API_KEY = 'bsog63BaN0sXddiIP6JakDc3agNjtmZ1pnyAumxO';
+  const API_URL = 'https://api.nasa.gov/planetary/apod';
+
+  // ===== STATE =====
+  let currentLang = localStorage.getItem('astrowafy_lang') || 'en';
+  let lastAPODData = null;
+  let currentQuality = 'hd';
+  let currentDisplayUrl = '';
+  let currentDownloadUrl = '';
+  let currentDownloadName = 'astrowafy-image.jpg';
+  let favorites = JSON.parse(localStorage.getItem('astrowafy_favs') || '[]');
+
+  // ===== DOM REFS =====
+  const $ = id => document.getElementById(id);
+  const langEnBtn = $('langEnBtn'), langBnBtn = $('langBnBtn');
+  const datePicker = $('datePicker'), refreshBtn = $('refreshBtn'), refreshIcon = $('refreshIcon');
+  const loadingState = $('loadingState'), errorState = $('errorState'), content = $('content');
+  const mediaWrapper = $('mediaWrapper'), hdOverlay = $('hdOverlay'), hdLink = $('hdLink');
+  const oneClickDownloadBtn = $('oneClickDownloadBtn'), oneClickDownloadLabel = $('oneClickDownloadLabel'), oneClickDownloadIcon = $('oneClickDownloadIcon');
+  const apodTitle = $('apodTitle'), apodDate = $('apodDate'), apodExplanation = $('apodExplanation');
+  const surpriseBtn = $('surpriseBtn');
+  const shareBtn = $('shareBtn'), favBtn = $('favBtn');
+  const lightboxOverlay = $('lightboxOverlay'), lightboxImg = $('lightboxImg'), lightboxClose = $('lightboxClose');
+  const favDrawer = $('favDrawer'), favList = $('favList'), closeDrawerBtn = $('closeDrawerBtn'), favToggleBtn = $('favToggleBtn');
+  const qualityStd = $('qualityStd'), qualityHd = $('qualityHd');
+
+  // ===== TRANSLATION =====
+  const translations = { en: { untitled: 'Untitled' }, bn: { untitled: 'শিরোনামহীন' } };
+  let translationCache = {};
+
+  function applyLanguage(lang) {
+    currentLang = lang; localStorage.setItem('astrowafy_lang', lang);
+    langEnBtn.classList.toggle('active', lang === 'en');
+    langBnBtn.classList.toggle('active', lang === 'bn');
+    if (lastAPODData) renderInfo(lastAPODData);
+  }
+  langEnBtn.addEventListener('click', ()=>applyLanguage('en'));
+  langBnBtn.addEventListener('click', ()=>applyLanguage('bn'));
+
+  async function translateText(text, targetLang) {
+    if (!text || targetLang === 'en') return text;
+    try {
+      const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`);
+      if (!res.ok) throw new Error('Translation failed');
+      const data = await res.json();
+      return data[0].map(chunk=>chunk[0]).join('');
+    } catch(e) { console.warn('Translation error:', e); return text; }
+  }
+
+  // ===== HELPERS =====
+  function todayISO() { const d=new Date(); const off=d.getTimezoneOffset(); return new Date(d.getTime()-off*60000).toISOString().split('T')[0]; }
+  function formatDateDMY(iso) { if(!iso) return ''; const [y,m,d]=iso.split('-'); return `${d}-${m}-${y}`; }
+  function setState(state) {
+    loadingState.classList.add('hidden'); loadingState.classList.remove('flex');
+    errorState.classList.add('hidden'); content.classList.add('hidden');
+    if (state==='loading') { loadingState.classList.remove('hidden'); loadingState.classList.add('flex'); }
+    else if (state==='error') errorState.classList.remove('hidden');
+    else if (state==='content') content.classList.remove('hidden');
+  }
+
+  function getDisplayUrl(data) {
+    if (data.media_type === 'video') return data.url;
+    return (currentQuality === 'hd' && data.hdurl) ? data.hdurl : data.url;
+  }
+
+  // ===== RENDER =====
+  function renderMedia(data) {
+    mediaWrapper.innerHTML = '';
+    const isVideo = data.media_type === 'video';
+    if (isVideo) {
+      hdOverlay.classList.add('hidden'); oneClickDownloadBtn.classList.add('hidden');
+      const container = document.createElement('div'); container.className='w-full'; container.style.aspectRatio='16/9';
+      container.innerHTML = `<iframe src="${data.url}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      mediaWrapper.appendChild(container);
+    } else {
+      const img = document.createElement('img');
+      const displayUrl = getDisplayUrl(data);
+      img.src = displayUrl; img.alt = data.title || translations[currentLang].untitled;
+      img.className = 'w-full object-contain'; img.style.maxHeight='550px';
+      mediaWrapper.appendChild(img);
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', ()=> { lightboxImg.src = data.hdurl || data.url; lightboxOverlay.classList.add('active'); });
+
+      const bestUrl = data.hdurl || data.url;
+      hdLink.href = bestUrl;
+      currentDisplayUrl = displayUrl;
+      currentDownloadUrl = bestUrl;
+      const extMatch = bestUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i);
+      const ext = extMatch ? extMatch[1] : 'jpg';
+      const safeName = (data.title || 'astrowafy-image').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      currentDownloadName = `astrowafy-${data.date||''}-${safeName}.${ext}`;
+      hdOverlay.classList.remove('hidden');
+      oneClickDownloadBtn.classList.remove('hidden');
+      // update fav button style (Instagram heart)
+      const isFav = favorites.some(f=>f.date===data.date);
+      favBtn.classList.toggle('favorited', isFav);
+      // update SVG: filled heart when favorited
+      const svg = favBtn.querySelector('svg');
+      if (isFav) {
+        svg.innerHTML = `<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor" stroke="none"/><path d="M12 6c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="currentColor" stroke="none"/>`;
+        // instead of default star, use a heart icon (Instagram style)
+        svg.innerHTML = `<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor" stroke="none"/>`;
+      } else {
+        svg.innerHTML = `<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>`;
+      }
+    }
+  }
+
+  async function renderInfo(data) {
+    const lang = currentLang;
+    apodDate.textContent = formatDateDMY(data.date);
+    if (lang === 'en') {
+      apodTitle.textContent = data.title || translations.en.untitled;
+      apodExplanation.textContent = data.explanation || '';
+      apodTitle.classList.remove('bn-text'); apodExplanation.classList.remove('bn-text');
+      apodTitle.style.opacity='1'; apodExplanation.style.opacity='1';
+      return;
+    }
+    const cacheKey = `${data.date}_${lang}`;
+    if (translationCache[cacheKey]) {
+      apodTitle.textContent = translationCache[cacheKey].title;
+      apodExplanation.textContent = translationCache[cacheKey].explanation;
+      apodTitle.classList.add('bn-text'); apodExplanation.classList.add('bn-text');
+      apodTitle.style.opacity='1'; apodExplanation.style.opacity='1';
+      return;
+    }
+    apodTitle.style.opacity='0.4'; apodExplanation.style.opacity='0.4';
+    const [translatedTitle, translatedExplanation] = await Promise.all([
+      translateText(data.title || '', lang), translateText(data.explanation || '', lang)
+    ]);
+    translationCache[cacheKey] = { title: translatedTitle || data.title || translations[lang].untitled, explanation: translatedExplanation || data.explanation || '' };
+    if (currentLang === lang && lastAPODData && lastAPODData.date === data.date) {
+      apodTitle.textContent = translationCache[cacheKey].title;
+      apodExplanation.textContent = translationCache[cacheKey].explanation;
+      apodTitle.classList.add('bn-text'); apodExplanation.classList.add('bn-text');
+      apodTitle.style.opacity='1'; apodExplanation.style.opacity='1';
+    }
+  }
+
+  // ===== FETCH =====
+  async function fetchAPOD(dateStr) {
+    setState('loading'); refreshIcon.classList.add('animate-spin');
+    try {
+      const res = await fetch(`${API_URL}?api_key=${API_KEY}&date=${dateStr}`);
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const data = await res.json();
+      lastAPODData = data;
+      renderMedia(data);
+      await renderInfo(data);
+      setState('content');
+    } catch(err) { console.error(err); setState('error'); }
+    finally { refreshIcon.classList.remove('animate-spin'); }
+  }
+
+  // ===== SURPRISE =====
+  function randomDate() {
+    const start = new Date(1995, 5, 16);
+    const end = new Date();
+    const diff = end.getTime() - start.getTime();
+    const rand = start.getTime() + Math.random() * diff;
+    const d = new Date(rand);
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  surpriseBtn.addEventListener('click', ()=>{
+    const rand = randomDate();
+    datePicker.value = rand;
+    fetchAPOD(rand);
+  });
+
+  // ===== QUALITY =====
+  function setQuality(q) {
+    currentQuality = q;
+    qualityStd.classList.toggle('active', q==='std');
+    qualityHd.classList.toggle('active', q==='hd');
+    if (lastAPODData && lastAPODData.media_type !== 'video') {
+      renderMedia(lastAPODData);
+    }
+  }
+  qualityStd.addEventListener('click', ()=>setQuality('std'));
+  qualityHd.addEventListener('click', ()=>setQuality('hd'));
+
+  // ===== SHARE =====
+  shareBtn.addEventListener('click', async ()=>{
+    const url = currentDisplayUrl || (lastAPODData && getDisplayUrl(lastAPODData));
+    if (!url) return;
+    try {
+      if (navigator.share) await navigator.share({ title: lastAPODData?.title || 'AstroWafy', text: 'Check out this APOD!', url });
+      else await navigator.clipboard.writeText(url).then(()=>alert('Image link copied!'));
+    } catch(e) { if(e.name!=='AbortError') console.warn('Share failed', e); }
+  });
+
+  // ===== FAVORITES (Instagram heart style) =====
+  function saveFavorites() { localStorage.setItem('astrowafy_favs', JSON.stringify(favorites)); renderFavList(); }
+  function renderFavList() {
+    favList.innerHTML = '';
+    if (!favorites.length) { favList.innerHTML = '<div class="empty">No favorites yet</div>'; return; }
+    favorites.forEach((item, idx)=>{
+      const div = document.createElement('div'); div.className='fav-item';
+      div.innerHTML = `
+        <img src="${item.url}" alt="${item.title}">
+        <div class="info"><div class="title">${item.title}</div><div class="date">${item.date}</div></div>
+        <button class="remove" data-idx="${idx}">&times;</button>
+      `;
+      div.querySelector('.remove').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        favorites.splice(idx,1);
+        saveFavorites();
+        if (lastAPODData && lastAPODData.date === item.date) {
+          favBtn.classList.remove('favorited');
+          const svg = favBtn.querySelector('svg');
+          svg.innerHTML = `<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>`;
+        }
+      });
+      div.addEventListener('click', ()=>{
+        datePicker.value = item.date;
+        fetchAPOD(item.date);
+        favDrawer.classList.remove('open');
+      });
+      favList.appendChild(div);
+    });
+  }
+  favBtn.addEventListener('click', ()=>{
+    if (!lastAPODData) return;
+    const idx = favorites.findIndex(f=>f.date===lastAPODData.date);
+    const svg = favBtn.querySelector('svg');
+    if (idx>-1) {
+      favorites.splice(idx,1);
+      favBtn.classList.remove('favorited');
+      svg.innerHTML = `<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>`;
+    } else {
+      favorites.push({ date: lastAPODData.date, title: lastAPODData.title, url: lastAPODData.url });
+      favBtn.classList.add('favorited');
+      // Instagram style filled heart
+      svg.innerHTML = `<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor" stroke="none"/>`;
+    }
+    saveFavorites();
+  });
+  favToggleBtn.addEventListener('click', ()=>{ favDrawer.classList.toggle('open'); renderFavList(); });
+  closeDrawerBtn.addEventListener('click', ()=>favDrawer.classList.remove('open'));
+  document.addEventListener('click', (e)=>{
+    if (favDrawer.classList.contains('open') && !favDrawer.contains(e.target) && e.target !== favToggleBtn) favDrawer.classList.remove('open');
+  });
+
+  // ===== DOWNLOAD =====
+  oneClickDownloadBtn.addEventListener('click', async ()=>{
+    if (!currentDownloadUrl) return;
+    oneClickDownloadBtn.disabled = true; oneClickDownloadIcon.classList.add('animate-bounce'); oneClickDownloadLabel.textContent='Downloading…';
+    try {
+      const res = await fetch(currentDownloadUrl);
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=currentDownloadName; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch(e) { console.warn('Download fallback', e); window.open(currentDownloadUrl, '_blank'); }
+    finally { oneClickDownloadBtn.disabled=false; oneClickDownloadIcon.classList.remove('animate-bounce'); oneClickDownloadLabel.textContent='Download'; }
+  });
+
+  // ===== LIGHTBOX =====
+  lightboxClose.addEventListener('click', ()=>lightboxOverlay.classList.remove('active'));
+  lightboxOverlay.addEventListener('click', (e)=>{ if (e.target===lightboxOverlay) lightboxOverlay.classList.remove('active'); });
+
+  // ===== INIT =====
+  document.addEventListener('DOMContentLoaded', ()=>{
+    applyLanguage(currentLang);
+    const today = todayISO();
+    datePicker.value = today; datePicker.max = today;
+    fetchAPOD(today);
+    renderFavList();
+  });
+  datePicker.addEventListener('change', ()=>{ if(datePicker.value) fetchAPOD(datePicker.value); });
+  refreshBtn.addEventListener('click', ()=>{ const selected = datePicker.value || todayISO(); fetchAPOD(selected); });
+</script>
 </body>
 </html>
